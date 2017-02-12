@@ -1,5 +1,8 @@
 const app = require('express')();
+const cors = require('cors');
 const db = require('./db');
+
+app.use(cors());
 
 app.get('/users', (req, res) => {
   const limit = 5;
@@ -17,6 +20,6 @@ app.get('/user/:id', (req, res) => {
   // TODO: add getUserById implementation
 });
 
-app.listen(3000, () => {
+app.listen(3001, () => {
   console.log('Server listening on PORT 3000')
 });
