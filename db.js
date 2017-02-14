@@ -9,8 +9,6 @@ const getUsers = (pageOffset, limit, sortField, sortCode) =>
       const collection = db.collection('users');
       const fieldsToRetrieve = { username: 1, gtScore: 1, _created_at: 1, _updated_at: 1 };
 
-      console.log(pageOffset, limit, sortField, sortCode);
-
       return collection
         .find({}, fieldsToRetrieve)
         .skip(pageOffset)
@@ -19,7 +17,6 @@ const getUsers = (pageOffset, limit, sortField, sortCode) =>
         .toArray()
         .then(users => {
           db.close();
-          console.log(users.length);
           return users;
         });
     });
