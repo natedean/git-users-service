@@ -21,6 +21,49 @@ const getUsers = (pageOffset, limit, sortField, sortCode) =>
         });
     });
 
-module.exports = {
-  getUsers
+const createNewUser = (username) => {
+  const newDoc = {
+    username: username,
+    gtScore: 0,
+    _created_at: new Date(),
+    _updated_at: new Date()
+  };
+
+  return getDbAndCollectionHandle('users').then(({collection, db}) => {
+    return collection.insertOne(newDoc, { returnOriginal: false }).then(res => {
+      console.log('inserted!', username);
+      db.close();
+      return updateUser(username);
+    })
+  });
 };
+
+const updateUser = (username) => {
+  // assuming usernames are unique... just incrementing gtScore by one at the moment
+  return getDbAndCollectionHandle('users').then(({collection, db}) => {
+    return collection.findOneAndUpdate({username: username}, {$inc: {gtScore: 1}, $set: {_updated_at: new Date()}}, { returnOriginal: false })
+      .then(res => {
+        db.close();
+
+        if (!res.value) { return createNewUser(username) }
+
+        console.log('not inserting');
+
+        return res;
+      })
+  });
+};
+
+module.exports = {
+  getUsers,
+  updateUser
+};
+
+function getDbAndCollectionHandle(collectionName) {
+  return MongoClient.connect(MONGO_URI)
+    .then(db => ({
+      collection: db.collection(collectionName),
+      db
+    }));
+}
+

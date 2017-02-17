@@ -23,6 +23,15 @@ app.get('/user/:id', (req, res) => {
   // TODO: add getUserById implementation
 });
 
+app.post('/user/update/:username', (req, res) => {
+  const username = req.params.username;
+  if (!username) return res.send('Must send a username!');
+
+  db.updateUser(username)
+    .then(user => res.send(user))
+    .catch(() => res.send('There has been an error updating the user'));
+});
+
 app.listen(3001, () => {
   console.log('Server listening on PORT 3001')
 });
