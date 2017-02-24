@@ -1,8 +1,11 @@
 const app = require('express')();
 const cors = require('cors');
 const db = require('./db');
+const bodyParser = require('body-parser');
 
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/users', (req, res) => {
   const limit = 20;
@@ -23,11 +26,25 @@ app.get('/user/:id', (req, res) => {
   // TODO: add getUserById implementation
 });
 
-app.post('/user/update/:username', (req, res) => {
-  const username = req.params.username;
-  if (!username) return res.send('Must send a username!');
+app.post('/user/answer', (req, res) => {
+  const answerData = req.body;
 
-  db.updateUser(username)
+  if (!answerData.userId) {
+    console.log('creating new user!')
+    return db.createNewUser().then(user => {
+      const updatedUserData = Object.assign({}, answerData, { userId: user._id });
+
+      return db.handleAnswerEvent(updatedUserData)
+        .then(user => {
+          res.send(user);
+        })
+        .catch(err => {
+          res.send('There has been an error updating the user');
+        });
+    });
+  }
+
+  db.handleAnswerEvent(answerData)
     .then(user => res.send(user))
     .catch(() => res.send('There has been an error updating the user'));
 });

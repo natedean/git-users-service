@@ -1,5 +1,6 @@
 const MONGO_URI = process.env.MONGO_URI;
 const MongoClient = require('mongodb').MongoClient;
+const ObjectID = require('mongodb').ObjectID;
 
 if (!MONGO_URI) throw('MONGO_URI environment variable must be set');
 
@@ -7,7 +8,15 @@ const getUsers = (pageOffset, limit, sortField, sortCode) =>
   MongoClient.connect(MONGO_URI)
     .then(db => {
       const collection = db.collection('users');
-      const fieldsToRetrieve = { username: 1, gtScore: 1, _created_at: 1, _updated_at: 1 };
+      const fieldsToRetrieve = {
+        username: 1,
+        gtScore: 1,
+        totalCorrect: 1,
+        totalIncorrect: 1,
+        skill: 1,
+        _created_at: 1,
+        _updated_at: 1
+      };
 
       return collection
         .find({}, fieldsToRetrieve)
@@ -21,42 +30,49 @@ const getUsers = (pageOffset, limit, sortField, sortCode) =>
         });
     });
 
-const createNewUser = (username) => {
+const createNewUser = (username = 'Random User') => {
   const newDoc = {
     username: username,
     gtScore: 0,
+    totalCorrect: 0,
+    totalIncorrect: 0,
+    correctIds: [],
+    incorrectIds: [],
+    skill: 0,
     _created_at: new Date(),
     _updated_at: new Date()
   };
 
   return getDbAndCollectionHandle('users').then(({collection, db}) => {
     return collection.insertOne(newDoc, { returnOriginal: false }).then(res => {
-      console.log('inserted!', username);
       db.close();
-      return updateUser(username);
+      return res.ops[0];
     })
   });
 };
 
-const updateUser = (username) => {
-  // assuming usernames are unique... just incrementing gtScore by one at the moment
+const handleAnswerEvent = (answerData) => {
+  const query = {_id: ObjectID(answerData.userId)};
+  const changeSet = {
+    $inc: answerData.isCorrect ? {totalCorrect: 1} : {totalIncorrect: 1},
+    $set: {_updated_at: new Date()},
+    $addToSet: answerData.isCorrect ? { correctIds: answerData.questionId } : { incorrectIds: answerData.questionId },
+    $pull: answerData.isCorrect ? { incorrectIds: answerData.questionId } : { correctIds: answerData.questionId }
+  };
+  const options = { returnOriginal: false };
+
   return getDbAndCollectionHandle('users').then(({collection, db}) => {
-    return collection.findOneAndUpdate({username: username}, {$inc: {gtScore: 1}, $set: {_updated_at: new Date()}}, { returnOriginal: false })
-      .then(res => {
+    return collection.findOneAndUpdate(query, changeSet, options).then(res => {
         db.close();
-
-        if (!res.value) { return createNewUser(username) }
-
-        console.log('not inserting');
-
-        return res;
+        return res.value;
       })
   });
 };
 
 module.exports = {
+  createNewUser,
   getUsers,
-  updateUser
+  handleAnswerEvent
 };
 
 function getDbAndCollectionHandle(collectionName) {
