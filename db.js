@@ -10,7 +10,6 @@ const getUsers = (pageOffset, limit, sortField, sortCode) =>
       const collection = db.collection('users');
       const fieldsToRetrieve = {
         username: 1,
-        gtScore: 1,
         totalCorrect: 1,
         totalIncorrect: 1,
         skill: 1,
@@ -33,12 +32,10 @@ const getUsers = (pageOffset, limit, sortField, sortCode) =>
 const createNewUser = (username = 'Random User') => {
   const newDoc = {
     username: username,
-    gtScore: 0,
     totalCorrect: 0,
     totalIncorrect: 0,
     correctIds: [],
     incorrectIds: [],
-    skill: 0,
     _created_at: new Date(),
     _updated_at: new Date()
   };
@@ -74,12 +71,3 @@ module.exports = {
   getUsers,
   handleAnswerEvent
 };
-
-function getDbAndCollectionHandle(collectionName) {
-  return MongoClient.connect(MONGO_URI)
-    .then(db => ({
-      collection: db.collection(collectionName),
-      db
-    }));
-}
-
