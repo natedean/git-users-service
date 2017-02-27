@@ -71,3 +71,11 @@ module.exports = {
   getUsers,
   handleAnswerEvent
 };
+
+function getDbAndCollectionHandle(collectionName) {
+  return MongoClient.connect(MONGO_URI)
+    .then(db => ({
+      collection: db.collection(collectionName),
+      db
+    }));
+}
