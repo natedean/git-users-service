@@ -1,6 +1,7 @@
 const app = require('express')();
 const cors = require('cors');
 const db = require('./db');
+const questions = require('./questions');
 const bodyParser = require('body-parser');
 
 app.use(cors());
@@ -29,8 +30,11 @@ app.get('/user/:id', (req, res) => {
 app.post('/user/answer', (req, res) => {
   const answerData = req.body;
 
+  questions.updateQuestion(answerData.questionId, answerData.isCorrect, answerData.milliseconds);
+
   if (!answerData.userId) {
-    console.log('creating new user!')
+    console.log('creating new user!');
+
     return db.createNewUser().then(user => {
       const updatedUserData = Object.assign({}, answerData, { userId: user._id });
 
@@ -47,6 +51,12 @@ app.post('/user/answer', (req, res) => {
   db.handleAnswerEvent(answerData)
     .then(user => res.send(user))
     .catch(() => res.send('There has been an error updating the user'));
+});
+
+app.get('/questions', (req, res) => {
+  questions.getAllQuestions()
+    .then(questions => res.send(questions))
+    .catch(() => res.send('There has been an error getting questions'));
 });
 
 app.listen(3001, () => {

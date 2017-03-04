@@ -40,7 +40,7 @@ const createNewUser = (username = 'Random User') => {
     _updated_at: new Date()
   };
 
-  return getDbAndCollectionHandle('users').then(({collection, db}) => {
+  return getCollection('users').then(({collection, db}) => {
     return collection.insertOne(newDoc, { returnOriginal: false }).then(res => {
       db.close();
       return res.ops[0];
@@ -58,7 +58,7 @@ const handleAnswerEvent = (answerData) => {
   };
   const options = { returnOriginal: false };
 
-  return getDbAndCollectionHandle('users').then(({collection, db}) => {
+  return getCollection('users').then(({collection, db}) => {
     return collection.findOneAndUpdate(query, changeSet, options).then(res => {
         db.close();
         return res.value;
@@ -69,10 +69,11 @@ const handleAnswerEvent = (answerData) => {
 module.exports = {
   createNewUser,
   getUsers,
-  handleAnswerEvent
+  handleAnswerEvent,
+  getCollection
 };
 
-function getDbAndCollectionHandle(collectionName) {
+function getCollection(collectionName) {
   return MongoClient.connect(MONGO_URI)
     .then(db => ({
       collection: db.collection(collectionName),
