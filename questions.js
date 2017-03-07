@@ -8,14 +8,12 @@ const getAllQuestions = () => {
 
       const avgQuestionSpeed = questions.reduce((acc, question) => acc + question.totalTime, 0) / questions.length;
 
-      console.log('avgQuestionSpeed', avgQuestionSpeed);
-
       return questions.map(question => {
         const { _id, answers, totalTime, totalCorrect, totalIncorrect, text } = question;
         const totalAttempts = totalCorrect + totalIncorrect;
-        const correctnessIndex = parseFloat(totalCorrect / totalAttempts).toFixed(5);
-        const speedIndex = parseFloat((totalTime / totalAttempts) / avgQuestionSpeed).toFixed(5);
-        const difficulty = parseFloat(correctnessIndex + speedIndex).toFixed(5);
+        const correctnessIndex = totalAttempts / totalCorrect;
+        const speedIndex = (totalTime / totalAttempts) / avgQuestionSpeed;
+        const difficulty = parseFloat(correctnessIndex + speedIndex).toFixed(4);
 
         return Object.assign({}, { _id, answers, text, difficulty, correctnessIndex, speedIndex });
       });
