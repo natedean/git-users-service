@@ -6,6 +6,7 @@ const getAllQuestions = () => {
     return collection.find({}).toArray().then(questions => {
       db.close();
 
+      // probably poll for avgQuestionSpeed and save somewhere so we don't incur this overhead every time.
       const avgQuestionSpeed = questions.reduce((acc, question) => acc + question.totalTime, 0) / questions.length;
 
       return questions.map(question => {

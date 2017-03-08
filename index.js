@@ -2,6 +2,7 @@ const app = require('express')();
 const cors = require('cors');
 const db = require('./db');
 const questions = require('./questions');
+const getStats = require('./getStats');
 const bodyParser = require('body-parser');
 
 app.use(cors());
@@ -59,6 +60,11 @@ app.get('/questions', (req, res) => {
     .catch(() => res.send('There has been an error getting questions'));
 });
 
+app.get('/stats', (req, res) => {
+  res.send(getStats());
+});
+
 app.listen(3001, () => {
   console.log('Server listening on PORT 3001')
 });
+
