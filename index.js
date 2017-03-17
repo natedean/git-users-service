@@ -2,7 +2,7 @@ const app = require('express')();
 const cors = require('cors');
 const db = require('./db');
 const questions = require('./questions');
-const getStats = require('./getStats');
+const getCachedStats = require('./getCachedStats');
 const bodyParser = require('body-parser');
 
 app.use(cors());
@@ -61,7 +61,7 @@ app.get('/questions', (req, res) => {
 });
 
 app.get('/stats', (req, res) => {
-  res.send(getStats());
+  res.send(getCachedStats());
 });
 
 app.listen(3001, () => {
