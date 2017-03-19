@@ -14,9 +14,17 @@ const getAllQuestions = () => {
         const totalAttempts = totalCorrect + totalIncorrect;
         const correctnessIndex = totalAttempts / totalCorrect;
         const speedIndex = (totalTime / totalAttempts) / avgQuestionSpeed;
-        const difficulty = parseFloat(correctnessIndex + speedIndex).toFixed(4);
+        const difficulty = correctnessIndex + speedIndex;
 
-        return Object.assign({}, { _id, answers, text, difficulty, correctnessIndex, speedIndex });
+        return {
+          _id,
+          answers,
+          text,
+          correctnessIndex: round(correctnessIndex),
+          speedIndex: round(speedIndex),
+          difficulty: round(difficulty)
+        };
+
       });
     });
   });
@@ -50,4 +58,8 @@ function getUpdateQuestionChangeset(isCorrect, cappedMilliseconds) {
   } else {
     return { totalIncorrect: 1 }
   }
+}
+
+function round(x) {
+  return parseFloat(x).toFixed(4);
 }
