@@ -2,7 +2,7 @@ const app = require('express')();
 const cors = require('cors');
 const db = require('./db');
 const questions = require('./questions');
-const getCachedStats = require('./getCachedStats');
+const { getCachedStats } = require('./cachedStats');
 const bodyParser = require('body-parser');
 
 app.use(cors());

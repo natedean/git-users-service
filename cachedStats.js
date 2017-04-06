@@ -113,5 +113,5 @@ function _roundValues(obj) {
   }, {});
 }
 
-module.exports = getCachedStats;
+module.exports = { getCachedStats };
 
